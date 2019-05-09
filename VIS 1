@@ -1,0 +1,77 @@
+########################################################################################################
+
+
+#TODO:
+#tuples need to be fixed on line 91~, 
+#(weights) seem to be off for some in df_plot,
+#maybe add more comments to code
+#rename variables 
+
+
+########################################################################################################
+
+
+import os
+import numpy as np
+import pandas as pd
+import holoviews as hv
+import networkx as nx 
+from holoviews import opts
+
+hv.extension('bokeh')
+
+from holoviews.element.graphs import layout_nodes
+
+#only file0_dummy is used
+file0_dummy = './GephiMatrix_author_similarity.csv'
+file1_dummy = './otherDummy.csv'
+file2_dummy = './otherDummy2.csv'
+
+df_data = pd.read_csv(file0_dummy, sep=';', header=0, index_col=False)
+
+p = []
+d = []
+e = []
+f = []
+hold = df_data.shape[0]
+
+#loop that sets values first in lists for columns
+i = 0
+while i < hold:
+    
+        b = list(df_data.columns.values)
+        del b[0]                  
+        a1 = len(b) - i
+        a = list(a1* (df_data.iloc[i,0],))
+        del a[:1]
+        
+        p = b
+        del p[:(i+1)]
+        
+        c = df_data.iloc[:,1].tolist()
+        del c[:(i+1)]
+
+        for ele in c: 
+            if ele == 1: 
+                c.remove(ele)
+                
+        e = list(e+a)
+        d = list(d+p)
+        f = list(f+c)
+              
+        i += 1
+        
+#df from which the plot will be made
+df_plot = pd.DataFrame(columns=['from', 'to', 'weight'])
+
+#puts said lists in columns
+df_plot['from'] = e
+df_plot['to'] = d
+df_plot['weight'] = f
+
+df_plot = df_plot.loc[df_plot['weight'] != 0.0]
+
+graph = hv.Graph(df_plot)
+
+#layout of graph
+layout_nodes(graph, layout=nx.layout.fruchterman_reingold_layout, kwargs={'weight': 'weight'})
